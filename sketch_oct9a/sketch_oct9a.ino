@@ -13,7 +13,11 @@
 #define BUTTON_PIN4 4
 #define BUTTON_PIN5 5
 
+typedef enum {
+  BOOT, DEMO, TURN, FAILED
+} State;
 
+State current_state = BOOT;
 
 //variabili per i tempi
 
@@ -35,8 +39,6 @@ int currIntensity;
 int fadeAmount;
 
 void wakeUp(){}
-
-
 
 void clic2(){
   clac=2;
@@ -89,7 +91,7 @@ void setup() {
 
 
   //interrupt per accendere luci
-   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), clic3, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), clic4, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN5), clic5, RISING);
@@ -98,11 +100,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), wakeUp, RISING); 
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), wakeUp, RISING); 
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN5), wakeUp, RISING); 
-
-  
-  
-
-
 }
 
 void read_difficulty() {
@@ -116,43 +113,9 @@ void read_difficulty() {
   t3 = t3_delays[difficulty];
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println("------------------------");
-
-    //se gioco è iniziato
-  /*if(!gameStarted){
-      //luce rossa inizia a pulsare
-      analogWrite(LEDr_PIN9, currIntensity);
-      currIntensity = currIntensity + fadeAmount;
-      if (currIntensity == 0 || currIntensity == 255) {
-        fadeAmount = -fadeAmount;
-      }
-      delay(20);
-
-      // Primo messaggio sulla seriale
-      Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
-
-      //inizia il timer
-      timer->start();
-
-    while (!gameStarted) { // Attendi il pulsante B1
-      if (digitalRead(BUTTON_PIN2) == HIGH) {
-        gameStarted = true; // Il gioco è iniziato
-        timer->stop(); // Interrompi il timer
-        break;
-      }
-  }
-
-  //se gioco non è iniziato in deep sleep
-  if(!gameStarted){
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
-    sleep_mode();
-
-    //si sveglia quando viene premuto un pulsante qualsiasi
-  }
-*/
+void boot() {
+  Serial.println("\n------------------------");
+  Serial.println("BOOT");
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN13, HIGH);
   digitalWrite(LEDG_PIN12, HIGH);
@@ -162,6 +125,11 @@ void loop() {
 
   delay(t1); //tempo attesa inizio gioco
 
+  current_state = DEMO;
+}
+
+void demo() {
+  Serial.println("DEMO");
   read_difficulty();
 
   //iniziano a spegnersi i led
@@ -184,11 +152,7 @@ void loop() {
           zero = zero*10;
           cont--;
           delay(t2);
-          Serial.println("\n");
-          Serial.println(salvo);
-          Serial.println("\n");
-          Serial.println("terzo");
-          
+          Serial.println(sprintf("\n%d – terzo", salvo));
         }
         break;
       case 2:
@@ -197,11 +161,8 @@ void loop() {
           salvo= salvo+2*zero;
           zero = zero*10;
           cont--;
-          delay(t3);
-                    Serial.println("\n");
-          Serial.println(salvo);
-                    Serial.println("\n");
-          Serial.println("secondo");
+          delay(t2);
+          Serial.println(sprintf("\n%d – secondo", salvo));
         }
         break;
       case 1:
@@ -210,11 +171,8 @@ void loop() {
           salvo= salvo+1*zero;
           zero = zero*10;
           cont--;
-          delay(t3);
-                    Serial.println("\n");
-          Serial.println(salvo);
-                    Serial.println("\n");
-          Serial.println("primo");
+          delay(t2);
+          Serial.println(sprintf("\n%d – primo", salvo));
         }
         break;
       case 0:
@@ -223,11 +181,8 @@ void loop() {
           salvo= salvo+0*zero;
           zero = zero*10;
           cont--;
-          delay(t3);
-                    Serial.println("\n");
-          Serial.println(salvo);
-                    Serial.println("\n");
-          Serial.println("zero");
+          delay(t2);
+          Serial.println(sprintf("\n%d – zero", salvo));
         }
         break;
     }
@@ -275,9 +230,65 @@ void loop() {
   Serial.println("\n clac");
   Serial.println(clac);
 
+  current_state = TURN;
+
+  delay(100000000000000000000000);
+}
+
+void turn() {
   
-  delay(1000000000000000000000);
-  
+}
+
+void loop() {
+  noInterrupts();
+  switch (current_state) {
+    case BOOT:
+      boot();
+      break;
+    case DEMO:
+      demo();
+      break;
+    case TURN: 
+      turn();
+      break;
+    default:
+      break;
+  }
+  interrupts();
+
+    //se gioco è iniziato
+  /*if(!gameStarted){
+      //luce rossa inizia a pulsare
+      analogWrite(LEDr_PIN9, currIntensity);
+      currIntensity = currIntensity + fadeAmount;
+      if (currIntensity == 0 || currIntensity == 255) {
+        fadeAmount = -fadeAmount;
+      }
+      delay(20);
+
+      // Primo messaggio sulla seriale
+      Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
+
+      //inizia il timer
+      timer->start();
+
+    while (!gameStarted) { // Attendi il pulsante B1
+      if (digitalRead(BUTTON_PIN2) == HIGH) {
+        gameStarted = true; // Il gioco è iniziato
+        timer->stop(); // Interrompi il timer
+        break;
+      }
+  }
+
+  //se gioco non è iniziato in deep sleep
+  if(!gameStarted){
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    sleep_mode();
+
+    //si sveglia quando viene premuto un pulsante qualsiasi
+  }
+*/ 
 
 
 }
