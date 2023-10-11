@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <avr/sleep.h>
-#include "Timer.h"
+#include "TimerOne.h"
 
 #define LEDG_PIN13 13 //button 5
 #define LEDG_PIN12 12 //button 4
@@ -19,7 +19,7 @@
 int t1 = 2000; //millisecondi prima di iniziare il gioco
 int t3= 1000; //millisecondi prima di spegnere il led dopo
 volatile int clac; //bottone premuto
-Timer* timer; 
+TimerOne* timer; 
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 int currIntensity;
 int fadeAmount;
@@ -48,8 +48,9 @@ void setup() {
   randomSeed(analogRead(0));
 
   //timer per lo sleep
-  timer = new Timer();
-  timer->setupPeriod(10000); //10 sec
+  timer = new TimerOne();
+  timer->setPeriod(10000); //10 sec
+  //timer.attachInterrupt();
 
   //interrupt che si attiva se schiacci uno dei bottoni
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
@@ -87,8 +88,7 @@ void loop() {
       //inizia il timer
       timer->start();
 
-      while (!gameStarted && !timer->isExpired()) {
-      // Attendi il pulsante B1
+    while (!gameStarted) { // Attendi il pulsante B1
       if (digitalRead(BUTTON_PIN2) == HIGH) {
         gameStarted = true; // Il gioco è iniziato
         timer->stop(); // Interrompi il timer
@@ -190,8 +190,8 @@ void loop() {
   Serial.println("ordine numeri usciti");
   Serial.println(salvo);
   
-  //clic = salvo/zero;
-  //salvo= salvo%zero;
+  clic = salvo/zero;
+  salvo= salvo%zero;
 
   
 
