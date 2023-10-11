@@ -10,7 +10,9 @@
 #define BUTTON_PIN6 5
 
 //variabili per i tempi
+int difficulty_delays[] = {1500, 1200, 900, 500};
 int t1 = 2000; //millisecondi prima di iniziare il gioco
+int t2 = 0; 
 int t3= 5000; //millisecondi prima di spegnere il led dopo
 
 void setup() {
@@ -33,6 +35,16 @@ void setup() {
   
 
 
+}
+
+void read_difficulty() {
+  int potentiometer_value = analogRead(POT_PIN); 
+  Serial.print("Potentiometer value = ");
+  Serial.println(potentiometer_value);
+  int difficulty = map(potentiometer_value, 0, 1023, 0, 3);
+  Serial.print("Difficulty = ");
+  Serial.println(difficulty);
+  t2 = difficulty_delays[difficulty];
 }
 
 void loop() {
