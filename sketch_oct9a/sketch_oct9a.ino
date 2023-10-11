@@ -68,10 +68,43 @@ void setup() {
 }
 
 void loop() {
-  
-  
   // put your main code here, to run repeatedly:
   Serial.println("------------------------");
+
+    //se gioco è iniziato
+  if(!gameStarted){
+      //luce rossa inizia a pulsare
+      analogWrite(LEDr_PIN9, currIntensity);
+      currIntensity = currIntensity + fadeAmount;
+      if (currIntensity == 0 || currIntensity == 255) {
+        fadeAmount = -fadeAmount;
+      }
+      delay(20);
+
+      // Primo messaggio sulla seriale
+      Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
+
+      //inizia il timer
+      timer->start();
+
+      while (!gameStarted && !timer->isExpired()) {
+      // Attendi il pulsante B1
+      if (digitalRead(BUTTON_PIN2) == HIGH) {
+        gameStarted = true; // Il gioco è iniziato
+        timer->stop(); // Interrompi il timer
+        break;
+      }
+  }
+
+  //se gioco non è iniziato in deep sleep
+  if(!gameStarted){
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    sleep_mode();
+
+    //si sveglia quando viene premuto un pulsante qualsiasi
+  }
+
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN13, HIGH);
   digitalWrite(LEDG_PIN12, HIGH);
