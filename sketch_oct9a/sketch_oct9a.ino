@@ -16,10 +16,18 @@
 
 
 //variabili per i tempi
-int difficulty_delays[] = {1500, 1200, 900, 500};
-int t1 = 2000; //millisecondi prima di iniziare il gioco
-int t2 = 0; 
-int t3= 5000; //millisecondi prima di spegnere il led dopo
+
+//millisecondi prima di iniziare il gioco
+int t1 = 2000;
+
+// millisecondi prima di spegnere il led dopo
+int t2_delays[] = {1500, 1200, 900, 500};
+int t2 = 1500; 
+
+// millisecondi per accendere i led
+int t3= 10000;
+int t3_delays[] = {10000, 6000, 4000, 2000};
+
 volatile int clac; //bottone premuto
 TimerOne* timer; 
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
@@ -104,7 +112,8 @@ void read_difficulty() {
   int difficulty = map(potentiometer_value, 0, 1023, 0, 3);
   Serial.print("Difficulty = ");
   Serial.println(difficulty);
-  t2 = difficulty_delays[difficulty];
+  t2 = t2_delays[difficulty];
+  t3 = t3_delays[difficulty];
 }
 
 void loop() {
@@ -150,7 +159,10 @@ void loop() {
   digitalWrite(LEDG_PIN11, HIGH);
   digitalWrite(LEDG_PIN10, HIGH);
   digitalWrite(LEDr_PIN9, HIGH);
+
   delay(t1); //tempo attesa inizio gioco
+
+  read_difficulty();
 
   //iniziano a spegnersi i led
   pinMode(LEDr_PIN9, LOW);
@@ -171,7 +183,7 @@ void loop() {
           salvo= salvo+3*zero;
           zero = zero*10;
           cont--;
-          delay(t3);
+          delay(t2);
           Serial.println("\n");
           Serial.println(salvo);
           Serial.println("\n");
