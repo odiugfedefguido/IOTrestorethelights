@@ -127,14 +127,14 @@ void loop() {
 
   zero = zero /10;
   
-  noInterrupts();
+  
   //inizio clic bottone utente
   int clic=0; //questa variabile contiene il numero del bottone che deve essere cliccato
   Serial.println("ordine numeri usciti");
   Serial.println(salvo);
-  
-  //clic = salvo/zero;
-  //salvo= salvo%zero;
+  interrupts(); //abilito le interruzioni
+  clic = salvo/zero;
+  salvo= salvo%zero;
 
   
 
@@ -143,27 +143,54 @@ void loop() {
   
   
 
-  
+  int i =0;
   //se il clic del bottone corrisponde a quello giusto allora vai avanti (ciclo che esci quando sbagli o quando finisci)
-  //while(clic==clac){
+  while(i<4){
     
-  //}
+    if(clic==clac){
+      clic = salvo/zero;
+      salvo= salvo%zero;
+    }
+    else{
+      noInterrupts();
+      digitalWrite(LEDr_PIN9, HIGH);
+      break;
+
+      
+    }
+    i++;
+  }
   //se clic sbagliato esci e fai ricominciare il gioco
 
-  interrupts();
+  
+  Serial.println("\n clac");
+  Serial.println(clac);
 
+  
   delay(1000000000000000000000);
   
 
 
 }
 
+void clic2(){
+  clac=2;
+  digitalWrite(LEDG_PIN10, HIGH);
+  Serial.println("primo bottone");
+}
+void clic3(){
+  clac=3;
+  digitalWrite(LEDG_PIN11, HIGH);
+  Serial.println("secondo bottone");
+}
 
 void clic4(){
   clac=4;
   digitalWrite(LEDG_PIN12, HIGH);
+  Serial.println("terzo bottone");
 }
 void clic5(){
   clac=5;
   digitalWrite(LEDG_PIN13, HIGH);
+  Serial.println("quarto bottone");
 }
