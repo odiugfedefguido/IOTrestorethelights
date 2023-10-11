@@ -33,6 +33,9 @@ int t3= 10000;
 int t3_delays[] = {10000, 6000, 4000, 2000};
 
 volatile int clac; //bottone premuto
+int clic;
+int zero;
+int salvo;
 TimerOne* timer; 
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 int currIntensity;
@@ -136,9 +139,9 @@ void demo() {
   pinMode(LEDr_PIN9, LOW);
 
   //manca la verifica che non venga spento due volte un led
-  int salvo=0; //variabile usata per non usare un vettore
+  salvo=0; //variabile usata per non usare un vettore
   int cont= 4; //led accesi
-  int zero= 1;
+  zero= 1;
 
   //qui spengo i led, devo spegnerli in un tempo T3
   while(cont>0)
@@ -192,40 +195,17 @@ void demo() {
   
   
   //inizio clic bottone utente
-  int clic=0; //questa variabile contiene il numero del bottone che deve essere cliccato
+  clic=0; //questa variabile contiene il numero del bottone che deve essere cliccato
   Serial.println("ordine numeri usciti");
   Serial.println(salvo);
 
-  interrupts(); //abilito le interruzioni
-  clic = salvo/zero;
-  salvo= salvo%zero;
+  
+  
 
   
 
   Serial.println("\n primo numero che premo");
   Serial.println(clic);
-  
-  
-
-  int i =0;
-  //se il clic del bottone corrisponde a quello giusto allora vai avanti (ciclo che esci quando sbagli o quando finisci)
-  while(i<4){
-    
-    if(clic==clac){
-      clic = salvo/zero;
-      salvo= salvo%zero;
-    }
-    else{
-      noInterrupts();
-      digitalWrite(LEDr_PIN9, HIGH);
-      break;
-
-      
-    }
-    i++;
-  }
-  //se clic sbagliato esci e fai ricominciare il gioco
-
   
   Serial.println("\n clac");
   Serial.println(clac);
@@ -236,7 +216,21 @@ void demo() {
 }
 
 void turn() {
-  
+  interrupts();
+  for(int i=0; i<4; i++){
+  if(clic==clac) //bottone premuto è quello corretto
+  {
+    //aggiorno i valori
+    clic = salvo/zero;
+    salvo= salvo%zero;
+  }
+  else{
+    noInterrupts();
+    current_state= BOOT;
+    break;
+  }
+  }
+  delay(10000000000000);
 }
 
 void loop() {
@@ -288,7 +282,7 @@ void loop() {
 
     //si sveglia quando viene premuto un pulsante qualsiasi
   }
-*/ 
+*/
 
 
 }
