@@ -1,3 +1,7 @@
+#include <Arduino.h>
+#include <avr/sleep.h>
+#include "TimerOne.h"
+
 #define LEDG_PIN13 13 //button 5
 #define LEDG_PIN12 12 //button 4
 #define LEDG_PIN11 11 //button 3
@@ -15,6 +19,37 @@
 int t1 = 2000; //millisecondi prima di iniziare il gioco
 int t3= 1000; //millisecondi prima di spegnere il led dopo
 volatile int clac; //bottone premuto
+TimerOne* timer; 
+bool gameStarted = false; // Flag per indicare se il gioco è iniziato
+int currIntensity;
+int fadeAmount;
+
+void wakeUp(){}
+
+
+
+void clic2(){
+  clac=2;
+  digitalWrite(LEDG_PIN10, HIGH);
+  Serial.println("primo bottone");
+}
+void clic3(){
+  clac=3;
+  digitalWrite(LEDG_PIN11, HIGH);
+  Serial.println("secondo bottone");
+}
+
+void clic4(){
+  clac=4;
+  digitalWrite(LEDG_PIN12, HIGH);
+  Serial.println("terzo bottone");
+}
+
+void clic5(){
+  clac=5;
+  digitalWrite(LEDG_PIN13, HIGH);
+  Serial.println("quarto bottone");
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,25 +64,74 @@ void setup() {
   pinMode(BUTTON_PIN4, INPUT);
   pinMode(BUTTON_PIN5, INPUT);
 
+  currIntensity = 0;
+  fadeAmount = 5;
+
   Serial.begin(9600);
 
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
+  //timer per lo sleep
+  timer = new TimerOne();
+  timer->setPeriod(10000); //10 sec
+  //timer.attachInterrupt();
+
+
+  //interrupt per accendere luci
+   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), clic3, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), clic4, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN5), clic5, RISING);
+  //interrupt che si attiva se schiacci uno dei bottoni
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN5), wakeUp, RISING); 
+
+  
   
 
 
 }
 
 void loop() {
-  
-  
   // put your main code here, to run repeatedly:
   Serial.println("------------------------");
+
+    //se gioco è iniziato
+  if(!gameStarted){
+      //luce rossa inizia a pulsare
+      analogWrite(LEDr_PIN9, currIntensity);
+      currIntensity = currIntensity + fadeAmount;
+      if (currIntensity == 0 || currIntensity == 255) {
+        fadeAmount = -fadeAmount;
+      }
+      delay(20);
+
+      // Primo messaggio sulla seriale
+      Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
+
+      //inizia il timer
+      timer->start();
+
+    while (!gameStarted) { // Attendi il pulsante B1
+      if (digitalRead(BUTTON_PIN2) == HIGH) {
+        gameStarted = true; // Il gioco è iniziato
+        timer->stop(); // Interrompi il timer
+        break;
+      }
+  }
+
+  //se gioco non è iniziato in deep sleep
+  if(!gameStarted){
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    sleep_mode();
+
+    //si sveglia quando viene premuto un pulsante qualsiasi
+  }
+
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN13, HIGH);
   digitalWrite(LEDG_PIN12, HIGH);
@@ -132,6 +216,7 @@ void loop() {
   int clic=0; //questa variabile contiene il numero del bottone che deve essere cliccato
   Serial.println("ordine numeri usciti");
   Serial.println(salvo);
+
   interrupts(); //abilito le interruzioni
   clic = salvo/zero;
   salvo= salvo%zero;
@@ -171,26 +256,4 @@ void loop() {
   
 
 
-}
-
-void clic2(){
-  clac=2;
-  digitalWrite(LEDG_PIN10, HIGH);
-  Serial.println("primo bottone");
-}
-void clic3(){
-  clac=3;
-  digitalWrite(LEDG_PIN11, HIGH);
-  Serial.println("secondo bottone");
-}
-
-void clic4(){
-  clac=4;
-  digitalWrite(LEDG_PIN12, HIGH);
-  Serial.println("terzo bottone");
-}
-void clic5(){
-  clac=5;
-  digitalWrite(LEDG_PIN13, HIGH);
-  Serial.println("quarto bottone");
-}
+}}
