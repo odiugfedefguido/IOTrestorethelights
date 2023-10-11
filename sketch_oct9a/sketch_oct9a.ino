@@ -100,7 +100,7 @@ void loop() {
   Serial.println("------------------------");
 
     //se gioco è iniziato
-  if(!gameStarted){
+  /*if(!gameStarted){
       //luce rossa inizia a pulsare
       analogWrite(LEDr_PIN9, currIntensity);
       currIntensity = currIntensity + fadeAmount;
@@ -131,7 +131,7 @@ void loop() {
 
     //si sveglia quando viene premuto un pulsante qualsiasi
   }
-
+*/
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN13, HIGH);
   digitalWrite(LEDG_PIN12, HIGH);
@@ -256,4 +256,4 @@ void loop() {
   
 
 
-}}
+}
