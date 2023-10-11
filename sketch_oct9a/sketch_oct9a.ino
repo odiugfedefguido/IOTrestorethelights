@@ -1,3 +1,7 @@
+#include <Arduino.h>
+#include <avr/sleep.h>
+#include "Timer.h"
+
 #define LEDG_PIN13 13 //button 5
 #define LEDG_PIN12 12 //button 4
 #define LEDG_PIN11 11 //button 3
@@ -15,6 +19,12 @@
 int t1 = 2000; //millisecondi prima di iniziare il gioco
 int t3= 1000; //millisecondi prima di spegnere il led dopo
 volatile int clac; //bottone premuto
+Timer* timer; 
+bool gameStarted = false; // Flag per indicare se il gioco è iniziato
+int currIntensity;
+int fadeAmount;
+
+void wakeUp(){}
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,11 +39,25 @@ void setup() {
   pinMode(BUTTON_PIN4, INPUT);
   pinMode(BUTTON_PIN5, INPUT);
 
+  currIntensity = 0;
+  fadeAmount = 5;
+
   Serial.begin(9600);
 
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
+  //timer per lo sleep
+  timer = new Timer();
+  timer->setupPeriod(10000); //10 sec
+
+  //interrupt che si attiva se schiacci uno dei bottoni
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN5), wakeUp, RISING); 
+
+  //interrupt per accendere luci
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), clic3, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), clic4, RISING);
