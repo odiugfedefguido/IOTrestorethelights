@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <avr/sleep.h>
-#include "TimerOne.h"
+#include <TimerOne.h>
 
 #define LEDG_PIN13 13 //button 5
 #define LEDG_PIN12 12 //button 4
@@ -36,12 +36,15 @@ volatile int clac; //bottone premuto
 int clic;
 int zero;
 int salvo;
-TimerOne* timer; 
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 int currIntensity;
+unsigned long waitTime = 10000;
+unsigned long startTime;
 int fadeAmount;
 
-void wakeUp(){}
+void wakeUp(){
+    // Viene chiamato quando il sistema si sveglia da uno stato di deep sleep
+}
 
 void clic2(){
   clac=2;
@@ -87,12 +90,6 @@ void setup() {
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
-  //timer per lo sleep
-  timer = new TimerOne();
-  timer->setPeriod(10000); //10 sec
-  //timer.attachInterrupt();
-
-
   //interrupt per accendere luci
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), clic2, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), clic3, RISING);
@@ -119,6 +116,44 @@ void read_difficulty() {
 void boot() {
   Serial.println("\n------------------------");
   Serial.println("BOOT");
+  //se gioco è iniziato
+  if (!gameStarted) {
+    // luce rossa inizia a pulsare
+    analogWrite(LEDr_PIN9, currIntensity);
+    currIntensity = currIntensity + fadeAmount;
+          Serial.println("val intesità \n");
+          Serial.println(currIntensity);
+
+    if (currIntensity == 0 || currIntensity == 255) {
+      fadeAmount = -fadeAmount;
+    }
+    delay(2000);
+    digitalWrite(LEDr_PIN9, HIGH);
+
+    // Primo messaggio sulla seriale
+    Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
+
+    // inizia il timer
+    startTime = millis();
+
+    //attendi pulsante b1 o che i 10 sec passino
+    while ((!gameStarted)&&(millis() - startTime <= waitTime)) { 
+      if (digitalRead(BUTTON_PIN2) == HIGH) {
+        gameStarted = true; // Il gioco è iniziato
+        break;
+      }
+    }
+  }
+
+  // se gioco non è iniziato in deep sleep
+  if (!gameStarted) {
+    Serial.println("sleep \n");
+    digitalWrite(LEDr_PIN9, LOW);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+    sleep_mode();
+  }
+
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN13, HIGH);
   digitalWrite(LEDG_PIN12, HIGH);
@@ -249,40 +284,4 @@ void loop() {
       break;
   }
   interrupts();
-
-    //se gioco è iniziato
-  /*if(!gameStarted){
-      //luce rossa inizia a pulsare
-      analogWrite(LEDr_PIN9, currIntensity);
-      currIntensity = currIntensity + fadeAmount;
-      if (currIntensity == 0 || currIntensity == 255) {
-        fadeAmount = -fadeAmount;
-      }
-      delay(20);
-
-      // Primo messaggio sulla seriale
-      Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
-
-      //inizia il timer
-      timer->start();
-
-    while (!gameStarted) { // Attendi il pulsante B1
-      if (digitalRead(BUTTON_PIN2) == HIGH) {
-        gameStarted = true; // Il gioco è iniziato
-        timer->stop(); // Interrompi il timer
-        break;
-      }
-  }
-
-  //se gioco non è iniziato in deep sleep
-  if(!gameStarted){
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
-    sleep_mode();
-
-    //si sveglia quando viene premuto un pulsante qualsiasi
-  }
-*/
-
-
 }
