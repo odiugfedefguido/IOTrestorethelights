@@ -80,6 +80,9 @@ void setup() {
   timer->setPeriod(10000); // 10 sec
   //timer.attachInterrupt();
 
+  fading_timer = new TimerOne();
+  fading_timer->initialize();
+
   //interrupt che si attiva se schiacci uno dei bottoni
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN1), wakeUp, RISING); 
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
@@ -102,8 +105,6 @@ void update_red_led_intensity() {
   // luce rossa inizia a pulsare
   analogWrite(LEDR_PIN, currIntensity);
   currIntensity = currIntensity + fadeAmount;
-  Serial.print("val intesità = ");
-  Serial.println(currIntensity);
 
   if (currIntensity == 0 || currIntensity == 255) {
     fadeAmount = -fadeAmount;
@@ -114,15 +115,13 @@ void boot() {
   Serial.println("\n------------------------");
   Serial.println("BOOT");
 
-  fading_timer = new TimerOne();
-  fading_timer->initialize(200);
-  fading_timer->attachInterrupt(update_red_led_intensity);
-
   // Primo messaggio sulla seriale
   Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
 
   // inizia il timer
   startTime = millis();
+
+  fading_timer->attachInterrupt(update_red_led_intensity, 20000);
 
   noInterrupts();
   current_state = FADING;
@@ -295,6 +294,7 @@ void turn() {
 }
 
 void loop() {
+  Serial.println(current_state);
   switch (current_state) {
     case BOOT:
       boot();
