@@ -38,11 +38,11 @@ int multiplier;
 int button_order;
 
 volatile int clac = -1; //bottone premuto
-int clic;
+int clic=0;
 
 TimerOne* timer; 
-int currIntensity = 0;
-int fadeAmount = 5;
+int currIntensity;
+int fadeAmount;
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 unsigned long waitTime = 10000;
 unsigned long startTime;
@@ -58,6 +58,7 @@ void on_button_1_clicked(){
     clac = BUTTON_PIN1;
     digitalWrite(LEDG_PIN1, HIGH);
     Serial.println("Button 1 clicked");
+    wakeUp();
   }
 }
 
@@ -66,6 +67,7 @@ void on_button_2_clicked(){
     clac = BUTTON_PIN2;
     digitalWrite(LEDG_PIN2, HIGH);
     Serial.println("Button 2 clicked");
+    wakeUp();
   }
 }
 
@@ -74,6 +76,7 @@ void on_button_3_clicked(){
     clac = BUTTON_PIN3;
     digitalWrite(LEDG_PIN3, HIGH);
     Serial.println("Button 3 clicked");
+    wakeUp();
   }
 }
 
@@ -82,6 +85,7 @@ void on_button_4_clicked(){
     clac = BUTTON_PIN4;
     digitalWrite(LEDG_PIN4, HIGH);
     Serial.println("Button 4 clicked");
+    wakeUp();
   }
 }
 
@@ -103,6 +107,9 @@ void setup() {
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
+  currIntensity = 0;
+  fadeAmount =  5;
+
   //timer per lo sleep
   timer = new TimerOne();
   timer->setPeriod(10000); // 10 sec
@@ -114,11 +121,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), on_button_3_clicked, RISING);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), on_button_4_clicked, RISING);
 
-  //interrupt che si attiva se schiacci uno dei bottoni
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN1), wakeUp, RISING); 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), wakeUp, RISING); 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), wakeUp, RISING); 
 }
 
 void read_difficulty() {
@@ -142,6 +144,7 @@ void update_red_led_intensity() {
     if (currIntensity == 0 || currIntensity == 255) {
       fadeAmount = -fadeAmount;
     }
+    delay(15);
 }
 
 void boot() {
@@ -160,7 +163,6 @@ void boot() {
     //attendi pulsante b1 o che i 10 sec passino
     while ((!gameStarted)&&(millis() - startTime <= waitTime)) { 
       update_red_led_intensity();
-      delay(100);
       if (digitalRead(BUTTON_PIN1) == HIGH) {
         gameStarted = true; // Il gioco è iniziato
         break;
@@ -171,6 +173,7 @@ void boot() {
   // se gioco non è iniziato in deep sleep
   if (!gameStarted) {
     Serial.println("sleep \n");
+    digitalWrite(LEDR_PIN, LOW);
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
     sleep_mode();
@@ -271,7 +274,8 @@ void turn() {
     } else {
       Serial.println("Wrong button. Game over!");
       interrupts();
-      delay(10000000000000);
+      //delay(10000000000000);
+      current_state = BOOT;
     }
 
     clac = -1;
