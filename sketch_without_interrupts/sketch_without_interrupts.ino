@@ -16,7 +16,7 @@
 #define BUTTON_PIN4 5
 
 typedef enum {
-  BOOT, DEMO, TURN, FAILED
+  BOOT, FADING, DEMO, TURN, FAILED
 } State;
 
 State current_state = BOOT;
@@ -35,59 +35,27 @@ int t3= 10000;
 int t3_delays[] = {10000, 6000, 4000, 2000};
 
 int multiplier;
+int divider = 1000;
 int button_order;
+int correct_presses = 0;
+int score;
 
 volatile int clac = -1; //bottone premuto
-int clic=0;
+int clic;
 
+int last_button_press = 0;
+int button_threshold = 500;
+
+TimerOne* fading_timer; 
 TimerOne* timer; 
-int currIntensity;
-int fadeAmount;
+int currIntensity = 0;
+int fadeAmount = 5;
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 unsigned long waitTime = 10000;
 unsigned long startTime;
 
-// TODO: Use or remove.
-void wakeUp(){
-  Serial.println("Button interrupt");
-  Serial.println(random(20000, 40000));
-}
-
-void on_button_1_clicked(){
-  if (current_state == TURN) {
-    clac = BUTTON_PIN1;
-    digitalWrite(LEDG_PIN1, HIGH);
-    Serial.println("Button 1 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_2_clicked(){
-  if (current_state == TURN) { 
-    clac = BUTTON_PIN2;
-    digitalWrite(LEDG_PIN2, HIGH);
-    Serial.println("Button 2 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_3_clicked(){
-  if (current_state == TURN) {
-    clac = BUTTON_PIN3;
-    digitalWrite(LEDG_PIN3, HIGH);
-    Serial.println("Button 3 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_4_clicked(){
-  if (current_state == TURN) {
-    clac = BUTTON_PIN4;
-    digitalWrite(LEDG_PIN4, HIGH);
-    Serial.println("Button 4 clicked");
-    wakeUp();
-  }
-}
+// To wake up from sleep mode
+void wakeUp(){}
 
 void setup() {
   // put your setup code here, to run once:
@@ -107,20 +75,16 @@ void setup() {
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
-  currIntensity = 0;
-  fadeAmount =  5;
-
   //timer per lo sleep
   timer = new TimerOne();
   timer->setPeriod(10000); // 10 sec
   //timer.attachInterrupt();
 
-  //interrupt per accendere luci
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN1), on_button_1_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), on_button_2_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), on_button_3_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), on_button_4_clicked, RISING);
-
+  //interrupt che si attiva se schiacci uno dei bottoni
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN1), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), wakeUp, RISING); 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), wakeUp, RISING); 
 }
 
 void read_difficulty() {
@@ -135,50 +99,55 @@ void read_difficulty() {
 }
 
 void update_red_led_intensity() {
-    // luce rossa inizia a pulsare
-    analogWrite(LEDR_PIN, currIntensity);
-    currIntensity = currIntensity + fadeAmount;
-          Serial.println("val intesità \n");
-          Serial.println(currIntensity);
-          Serial.println(fadeAmount);
+  // luce rossa inizia a pulsare
+  analogWrite(LEDR_PIN, currIntensity);
+  currIntensity = currIntensity + fadeAmount;
+  Serial.print("val intesità = ");
+  Serial.println(currIntensity);
 
-    if (currIntensity == 0 || currIntensity == 255) {
-      fadeAmount = -fadeAmount;
-    }
-    delay(15);
+  if (currIntensity == 0 || currIntensity == 255) {
+    fadeAmount = -fadeAmount;
+  }
 }
 
 void boot() {
   Serial.println("\n------------------------");
   Serial.println("BOOT");
 
-  
+  fading_timer = new TimerOne();
+  fading_timer->initialize(200);
+  fading_timer->attachInterrupt(update_red_led_intensity);
+
+  // Primo messaggio sulla seriale
+  Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
+
+  // inizia il timer
+  startTime = millis();
+
+  noInterrupts();
+  current_state = FADING;
+  interrupts();
+}
+
+void fading() {
   //se gioco è iniziato
   if (!gameStarted) {
-    // Primo messaggio sulla seriale
-    Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
-
-    // inizia il timer
-    startTime = millis();
-
-    //attendi pulsante b1 o che i 10 sec passino
-    while ((!gameStarted)&&(millis() - startTime <= waitTime)) { 
-      update_red_led_intensity();
+    if (millis() - startTime <= waitTime) {
       if (digitalRead(BUTTON_PIN1) == HIGH) {
         gameStarted = true; // Il gioco è iniziato
-        break;
+      } else {
+        return;
       }
+    } else {
+      // se gioco non è iniziato in deep sleep
+      Serial.println("sleep \n");
+      set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+      sleep_enable();
+      sleep_mode();
     }
   }
 
-  // se gioco non è iniziato in deep sleep
-  if (!gameStarted) {
-    Serial.println("sleep \n");
-    digitalWrite(LEDR_PIN, LOW);
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
-    sleep_mode();
-  }
+  fading_timer->detachInterrupt();
 
   //stato iniziale di gioco dove tutti i led verdi sono accesi
   digitalWrite(LEDG_PIN4, HIGH);
@@ -192,7 +161,7 @@ void boot() {
   noInterrupts();
   current_state = DEMO;
   Serial.println("DEMO");
-  interrupts();
+  interrupts();  
 }
 
 void demo() {
@@ -251,8 +220,6 @@ void demo() {
     delay(t2);
   }
 
-  multiplier = multiplier / 10;
-
   Serial.print("Button order = ");
   Serial.println(button_order);
 
@@ -262,25 +229,68 @@ void demo() {
   interrupts();
 }
 
+void finish_turn() {
+  noInterrupts();
+  if (correct_presses == 4) {
+    score += 500;
+    Serial.println("You won this round!");
+    // TODO: Modify difficulties
+  }
+
+  Serial.print("Your current score is: ");
+  Serial.println(score);
+
+  int correct_presses = 0;
+  current_state = DEMO;
+  interrupts();
+}
+
 void turn() {
   noInterrupts();
-  if (clac != -1) {
+
+  // TODO: What if time is over?
+
+  if (digitalRead(BUTTON_PIN1) == HIGH) {
+    digitalWrite(LEDG_PIN1, HIGH);
+    clac = 0;
+  } else if (digitalRead(BUTTON_PIN2) == HIGH) {
+    digitalWrite(LEDG_PIN2, HIGH);
+    clac = 1;
+  } else if (digitalRead(BUTTON_PIN3) == HIGH) {
+    digitalWrite(LEDG_PIN3, HIGH);
+    clac = 2;
+  } else if (digitalRead(BUTTON_PIN4) == HIGH) {
+    digitalWrite(LEDG_PIN4, HIGH);
+    clac = 3;
+  }
+
+  if (clac != -1 && millis() - last_button_press > button_threshold) {
+    last_button_press = millis();
+    clic = button_order / divider;
+
     Serial.print("Registered press of button ");
     Serial.println(clac);
+    Serial.print("Expected press of button ");
+    Serial.println(clic);
 
     if (clic == clac) {
-      clic = button_order / multiplier;
-      button_order = button_order % multiplier;
+      button_order = button_order % divider;
+      divider = divider / 10;
+      correct_presses++;
       Serial.println("Correct button pressed!");
+
+      if (correct_presses == 4) {
+        finish_turn();
+        interrupts();
+        return;
+      }
     } else {
       Serial.println("Wrong button. Game over!");
-      interrupts();
-      //delay(10000000000000);
-      current_state = BOOT;
+      finish_turn();
     }
-
-    clac = -1;
   }
+
+  clac = -1;
   interrupts();
 }
 
@@ -288,6 +298,9 @@ void loop() {
   switch (current_state) {
     case BOOT:
       boot();
+      break;
+    case FADING:
+      fading();
       break;
     case DEMO:
       demo();
