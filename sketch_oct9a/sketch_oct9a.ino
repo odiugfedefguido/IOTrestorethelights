@@ -140,6 +140,7 @@ void update_red_led_intensity() {
     currIntensity = currIntensity + fadeAmount;
           Serial.println("val intesità \n");
           Serial.println(currIntensity);
+          Serial.println(fadeAmount);
 
     if (currIntensity == 0 || currIntensity == 255) {
       fadeAmount = -fadeAmount;
