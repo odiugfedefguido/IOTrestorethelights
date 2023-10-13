@@ -41,8 +41,8 @@ volatile int clac = -1; //bottone premuto
 int clic=0;
 
 TimerOne* timer; 
-int currIntensity = 0;
-int fadeAmount = 5;
+int currIntensity;
+int fadeAmount;
 bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 unsigned long waitTime = 10000;
 unsigned long startTime;
@@ -107,6 +107,9 @@ void setup() {
   // Inizializza la generazione dei numeri casuali
   randomSeed(analogRead(0));
 
+  currIntensity = 0;
+  fadeAmount =  5;
+
   //timer per lo sleep
   timer = new TimerOne();
   timer->setPeriod(10000); // 10 sec
@@ -141,6 +144,7 @@ void update_red_led_intensity() {
     if (currIntensity == 0 || currIntensity == 255) {
       fadeAmount = -fadeAmount;
     }
+    delay(15);
 }
 
 void boot() {
@@ -159,7 +163,6 @@ void boot() {
     //attendi pulsante b1 o che i 10 sec passino
     while ((!gameStarted)&&(millis() - startTime <= waitTime)) { 
       update_red_led_intensity();
-      delay(100);
       if (digitalRead(BUTTON_PIN1) == HIGH) {
         gameStarted = true; // Il gioco è iniziato
         break;
