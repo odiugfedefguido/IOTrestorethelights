@@ -35,13 +35,10 @@ int t3= 10000;
 int t3_delays[] = {10000, 6000, 4000, 2000};
 
 int multiplier;
-int divider = 1000;
+int divider;
 int button_order;
 int correct_presses = 0;
 int score;
-
-volatile int clac = -1; //bottone premuto
-int clic;
 
 int last_button_press = 0;
 int button_threshold = 500;
@@ -120,12 +117,21 @@ void boot() {
 
   // inizia il timer
   startTime = millis();
+  gameStarted = false;
 
   fading_timer->attachInterrupt(update_red_led_intensity, 20000);
 
   noInterrupts();
   current_state = FADING;
   interrupts();
+}
+
+void light_green_leds() {
+  //stato iniziale di gioco dove tutti i led verdi sono accesi
+  digitalWrite(LEDG_PIN4, HIGH);
+  digitalWrite(LEDG_PIN3, HIGH);
+  digitalWrite(LEDG_PIN2, HIGH);
+  digitalWrite(LEDG_PIN1, HIGH);
 }
 
 void fading() {
@@ -148,11 +154,7 @@ void fading() {
 
   fading_timer->detachInterrupt();
 
-  //stato iniziale di gioco dove tutti i led verdi sono accesi
-  digitalWrite(LEDG_PIN4, HIGH);
-  digitalWrite(LEDG_PIN3, HIGH);
-  digitalWrite(LEDG_PIN2, HIGH);
-  digitalWrite(LEDG_PIN1, HIGH);
+  light_green_leds();
   digitalWrite(LEDR_PIN, HIGH);
 
   delay(t1); //tempo attesa inizio gioco
@@ -171,7 +173,10 @@ void demo() {
 
   button_order = 0; //variabile usata per non usare un vettore
   int led_count = 0; //led accesi
+
   multiplier = 1;
+  divider = 1000;
+  correct_presses = 0;
 
   //qui spengo i led, devo spegnerli in un tempo T3
   while (led_count < 4) {
@@ -222,6 +227,8 @@ void demo() {
   Serial.print("Button order = ");
   Serial.println(button_order);
 
+  startTime = millis();
+
   noInterrupts();
   current_state = TURN;
   Serial.println("TURN");
@@ -232,22 +239,38 @@ void finish_turn() {
   noInterrupts();
   if (correct_presses == 4) {
     score += 500;
+    t1 = (int) t1 * 0.95;
+    t2 = (int) t2 * 0.95;
+    t3 = (int) t3 * 0.95;
     Serial.println("You won this round!");
-    // TODO: Modify difficulties
   }
 
   Serial.print("Your current score is: ");
   Serial.println(score);
 
   int correct_presses = 0;
+  interrupts();
+
+  light_green_leds();
+  delay(t1); //tempo attesa inizio gioco
+
+  noInterrupts();
   current_state = DEMO;
   interrupts();
 }
 
 void turn() {
+  int clac = -1; //bottone premuto
+  int current_time = millis();
+
   noInterrupts();
 
-  // TODO: What if time is over?
+  if (current_time - startTime > t3) {
+    Serial.println("Timed out.");
+    finish_turn();
+    interrupts();
+    return;
+  }
 
   if (digitalRead(BUTTON_PIN1) == HIGH) {
     digitalWrite(LEDG_PIN1, HIGH);
@@ -265,7 +288,7 @@ void turn() {
 
   if (clac != -1 && millis() - last_button_press > button_threshold) {
     last_button_press = millis();
-    clic = button_order / divider;
+    int clic = button_order / divider;
 
     Serial.print("Registered press of button ");
     Serial.println(clac);
@@ -289,12 +312,10 @@ void turn() {
     }
   }
 
-  clac = -1;
   interrupts();
 }
 
 void loop() {
-  Serial.println(current_state);
   switch (current_state) {
     case BOOT:
       boot();
