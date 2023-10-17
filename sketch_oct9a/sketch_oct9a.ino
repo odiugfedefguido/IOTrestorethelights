@@ -1,13 +1,14 @@
 #include <Arduino.h>
 #include <avr/sleep.h>
 #include <TimerOne.h>
+#include <EnableInterrupt.h>
 
 #define LEDG_PIN1 10 //button 2
 #define LEDG_PIN2 11 //button 3
 #define LEDG_PIN3 12 //button 4
 #define LEDG_PIN4 13 //button 5
 
-#define LEDR_PIN 9
+#define LEDR_PIN 6
 #define POT_PIN A0
 
 #define BUTTON_PIN1 2
@@ -55,7 +56,7 @@ void wakeUp(){
 
 void on_button_1_clicked(){
   if (current_state == TURN) {
-    clac = BUTTON_PIN1;
+    clac = 0;
     digitalWrite(LEDG_PIN1, HIGH);
     Serial.println("Button 1 clicked");
     wakeUp();
@@ -64,7 +65,7 @@ void on_button_1_clicked(){
 
 void on_button_2_clicked(){
   if (current_state == TURN) { 
-    clac = BUTTON_PIN2;
+    clac = 1;
     digitalWrite(LEDG_PIN2, HIGH);
     Serial.println("Button 2 clicked");
     wakeUp();
@@ -73,7 +74,7 @@ void on_button_2_clicked(){
 
 void on_button_3_clicked(){
   if (current_state == TURN) {
-    clac = BUTTON_PIN3;
+    clac = 2;
     digitalWrite(LEDG_PIN3, HIGH);
     Serial.println("Button 3 clicked");
     wakeUp();
@@ -82,7 +83,7 @@ void on_button_3_clicked(){
 
 void on_button_4_clicked(){
   if (current_state == TURN) {
-    clac = BUTTON_PIN4;
+    clac = 3;
     digitalWrite(LEDG_PIN4, HIGH);
     Serial.println("Button 4 clicked");
     wakeUp();
@@ -116,10 +117,10 @@ void setup() {
   //timer.attachInterrupt();
 
   //interrupt per accendere luci
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN1), on_button_1_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN2), on_button_2_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN3), on_button_3_clicked, RISING);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN4), on_button_4_clicked, RISING);
+  enableInterrupt(BUTTON_PIN1, on_button_1_clicked, RISING);
+  enableInterrupt(BUTTON_PIN2, on_button_2_clicked, RISING);
+  enableInterrupt(BUTTON_PIN3, on_button_3_clicked, RISING);
+  enableInterrupt(BUTTON_PIN4, on_button_4_clicked, RISING);
 
 }
 
@@ -267,15 +268,21 @@ void turn() {
   if (clac != -1) {
     Serial.print("Registered press of button ");
     Serial.println(clac);
-
+    clic = button_order / multiplier;
+    Serial.println("multipler");
+    Serial.println(multiplier);
+    Serial.println("clic");
+    Serial.println(clic);
     if (clic == clac) {
       clic = button_order / multiplier;
       button_order = button_order % multiplier;
+      multiplier= multiplier/10;
       Serial.println("Correct button pressed!");
+      
     } else {
       Serial.println("Wrong button. Game over!");
       interrupts();
-      //delay(10000000000000);
+      delay(10000000000000);
       current_state = BOOT;
     }
 
