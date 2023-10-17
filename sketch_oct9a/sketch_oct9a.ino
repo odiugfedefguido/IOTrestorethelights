@@ -283,9 +283,8 @@ void turn() {
       
     } else {
       Serial.println("Wrong button. Game over!");
-      interrupts();
+      //interrupts();
       attemps=4;
-      delay(10000000000000);
       current_state = BOOT;
     }
 
