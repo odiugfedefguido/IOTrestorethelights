@@ -40,6 +40,7 @@ int button_order;
 
 volatile int clac = -1; //bottone premuto
 int clic=0;
+volatile int attemps = 4;
 
 TimerOne* timer; 
 int currIntensity;
@@ -277,15 +278,21 @@ void turn() {
       clic = button_order / multiplier;
       button_order = button_order % multiplier;
       multiplier= multiplier/10;
+      attemps--;
       Serial.println("Correct button pressed!");
       
     } else {
       Serial.println("Wrong button. Game over!");
       interrupts();
+      attemps=4;
       delay(10000000000000);
       current_state = BOOT;
     }
 
+    if(attemps==0){
+      attemps=4;
+      current_state=BOOT;
+    }
     clac = -1;
   }
   interrupts();
