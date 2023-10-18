@@ -23,17 +23,17 @@ typedef enum {
 State current_state = BOOT;
 
 // variabili per i tempi
+typedef struct {
+  int t1; // millisecondi prima di iniziare il gioco
+  int t2; // millisecondi prima di spegnere il led dopo
+  int *t2_delays;
+  int t3; // millisecondi per accendere i led
+  int *t3_delays;
+} TimeData;
 
-// millisecondi prima di iniziare il gioco
-int t1 = 2000;
-
-// millisecondi prima di spegnere il led dopo
-int t2_delays[] = {1500, 1200, 900, 500};
-int t2 = 1500; 
-
-// millisecondi per accendere i led
-int t3= 10000;
-int t3_delays[] = {10000, 6000, 4000, 2000};
+TimeData time_data = {
+  2000, 15000, (1500, 1200, 900, 500), 1000, (10000, 6000, 4000, 2000)
+};
 
 int multiplier;
 int button_order;
@@ -49,11 +49,7 @@ bool gameStarted = false; // Flag per indicare se il gioco è iniziato
 unsigned long waitTime = 10000;
 unsigned long startTime;
 
-// TODO: Use or remove.
-void wakeUp(){
-  Serial.println("Button interrupt");
-  Serial.println(random(20000, 40000));
-}
+void wakeUp(){}
 
 void on_button_1_clicked(){
   if (current_state == TURN) {
@@ -127,22 +123,22 @@ void setup() {
 
 void read_difficulty() {
   int potentiometer_value = analogRead(POT_PIN); 
-  Serial.print("Potentiometer value = ");
-  Serial.println(potentiometer_value);
+  Serial.print("Potentiometer value = " + String(potentiometer_value));
+
   int difficulty = map(potentiometer_value, 0, 1023, 0, 3);
-  Serial.print("Difficulty = ");
-  Serial.println(difficulty);
-  t2 = t2_delays[difficulty];
-  t3 = t3_delays[difficulty];
+  Serial.print("Difficulty = " + String(difficulty));
+  
+  time_data.t2 = time_data.t2_delays[difficulty];
+  time_data.t3 = time_data.t3_delays[difficulty];
 }
 
 void update_red_led_intensity() {
     // luce rossa inizia a pulsare
     analogWrite(LEDR_PIN, currIntensity);
     currIntensity = currIntensity + fadeAmount;
-          Serial.println("val intesità \n");
-          Serial.println(currIntensity);
-          Serial.println(fadeAmount);
+    Serial.println("val intesità \n");
+    Serial.println(currIntensity);
+    Serial.println(fadeAmount);
 
     if (currIntensity == 0 || currIntensity == 255) {
       fadeAmount = -fadeAmount;
@@ -189,7 +185,7 @@ void boot() {
   digitalWrite(LEDG_PIN1, HIGH);
   digitalWrite(LEDR_PIN, HIGH);
 
-  delay(t1); //tempo attesa inizio gioco
+  delay(time_data.t1); //tempo attesa inizio gioco
 
   noInterrupts();
   current_state = DEMO;
@@ -250,7 +246,7 @@ void demo() {
     button_order = button_order + n * multiplier;
     multiplier = multiplier * 10;
     led_count++; 
-    delay(t2);
+    delay(time_data.t2);
   }
 
   multiplier = multiplier / 10;
@@ -289,6 +285,12 @@ void turn() {
     }
 
     if(attemps==0){
+      // TODO: Move to correct location.
+      time_data.t1 = (int) time_data.t1 * 0.95;
+      time_data.t2 = (int) time_data.t2 * 0.95;
+      time_data.t3 = (int) time_data.t3 * 0.95;
+      Serial.println("You won this round!");
+
       attemps=4;
       current_state=BOOT;
     }
