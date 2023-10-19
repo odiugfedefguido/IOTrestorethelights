@@ -41,6 +41,7 @@ int button_order;
 volatile int clac = -1; //bottone premuto
 int clic=0;
 volatile int attemps = 4;
+volatile int points=0;
 
 TimerOne* timer; 
 int currIntensity;
@@ -136,9 +137,9 @@ void update_red_led_intensity() {
     // luce rossa inizia a pulsare
     analogWrite(LEDR_PIN, currIntensity);
     currIntensity = currIntensity + fadeAmount;
-    Serial.println("val intesità \n");
-    Serial.println(currIntensity);
-    Serial.println(fadeAmount);
+    //Serial.println("val intesità \n");
+    //Serial.println(currIntensity);
+    //Serial.println(fadeAmount);
 
     if (currIntensity == 0 || currIntensity == 255) {
       fadeAmount = -fadeAmount;
@@ -238,10 +239,10 @@ void demo() {
         }
     }
 
-    Serial.print("Turned off light #");
-    Serial.print(led_count);
-    Serial.print(" = ");
-    Serial.println(n);
+    //Serial.print("Turned off light #");
+    //Serial.print(led_count);
+    //Serial.print(" = ");
+    //Serial.println(n);
 
     button_order = button_order + n * multiplier;
     multiplier = multiplier * 10;
@@ -257,6 +258,10 @@ void demo() {
   noInterrupts();
   current_state = TURN;
   Serial.println("TURN");
+  Serial.println("Go!");
+  points=0;
+  Serial.println("points:");
+  Serial.println(points);
   interrupts();
 }
 
@@ -275,10 +280,10 @@ void turn() {
       button_order = button_order % multiplier;
       multiplier= multiplier/10;
       attemps--;
-      Serial.println("Correct button pressed!");
+      //Serial.println("Correct button pressed!");
       
     } else {
-      Serial.println("Wrong button. Game over!");
+      //Serial.println("Wrong button. Game over!");
       //interrupts();
       attemps=4;
       current_state = BOOT;
@@ -289,7 +294,9 @@ void turn() {
       time_data.t1 = (int) time_data.t1 * 0.95;
       time_data.t2 = (int) time_data.t2 * 0.95;
       time_data.t3 = (int) time_data.t3 * 0.95;
-      Serial.println("You won this round!");
+      points++;
+      Serial.println("New Point! Total Points:");
+      Serial.println(points);
 
       attemps=4;
       current_state=BOOT;
