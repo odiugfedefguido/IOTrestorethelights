@@ -56,7 +56,7 @@ void on_button_1_clicked(){
   if (current_state == TURN) {
     clac = 0;
     digitalWrite(LEDG_PIN1, HIGH);
-    Serial.println("Button 1 clicked");
+    //Serial.println("Button 1 clicked");
     wakeUp();
   }
 }
@@ -286,6 +286,7 @@ void turn() {
       //Serial.println("Wrong button. Game over!");
       //interrupts();
       attemps=4;
+      points=0;
       current_state = BOOT;
     }
 
