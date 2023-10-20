@@ -1,151 +1,5 @@
-#include <Arduino.h>
-#include <avr/sleep.h>
-#include <TimerOne.h>
-#include <EnableInterrupt.h>
-
-#define LEDG_PIN1 10 //button 2
-#define LEDG_PIN2 11 //button 3
-#define LEDG_PIN3 12 //button 4
-#define LEDG_PIN4 13 //button 5
-
-#define LEDR_PIN 6
-#define POT_PIN A0
-
-#define BUTTON_PIN1 2
-#define BUTTON_PIN2 3
-#define BUTTON_PIN3 4
-#define BUTTON_PIN4 5
-
-typedef enum {
-  BOOT, DEMO, TURN, FAILED
-} State;
-
-State current_state = BOOT;
-
-// variabili per i tempi
-typedef struct {
-  int t1; // millisecondi prima di iniziare il gioco
-  int t2; // millisecondi prima di spegnere il led dopo
-  int *t2_delays;
-  int t3; // millisecondi per accendere i led
-  int *t3_delays;
-} TimeData;
-
-TimeData time_data = {
-  2000, 15000, (1500, 1200, 900, 500), 1000, (10000, 6000, 4000, 2000)
-};
-
-int multiplier;
-int button_order;
-
-volatile int clac = -1; //bottone premuto
-int clic=0;
-volatile int attemps = 4;
-volatile int points=0;
-
-TimerOne* timer; 
-int currIntensity;
-int fadeAmount;
-bool gameStarted = false; // Flag per indicare se il gioco è iniziato
-unsigned long waitTime = 10000;
-unsigned long startTime;
-
-void wakeUp(){}
-
-void on_button_1_clicked(){
-  if (current_state == TURN) {
-    clac = 0;
-    digitalWrite(LEDG_PIN1, HIGH);
-    //Serial.println("Button 1 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_2_clicked(){
-  if (current_state == TURN) { 
-    clac = 1;
-    digitalWrite(LEDG_PIN2, HIGH);
-    Serial.println("Button 2 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_3_clicked(){
-  if (current_state == TURN) {
-    clac = 2;
-    digitalWrite(LEDG_PIN3, HIGH);
-    Serial.println("Button 3 clicked");
-    wakeUp();
-  }
-}
-
-void on_button_4_clicked(){
-  if (current_state == TURN) {
-    clac = 3;
-    digitalWrite(LEDG_PIN4, HIGH);
-    Serial.println("Button 4 clicked");
-    wakeUp();
-  }
-}
-
-void setup() {
-  // put your setup code here, to run once:
-  pinMode(LEDG_PIN1, OUTPUT);
-  pinMode(LEDG_PIN2, OUTPUT);
-  pinMode(LEDG_PIN3, OUTPUT);
-  pinMode(LEDG_PIN4, OUTPUT);
-  pinMode(LEDR_PIN, OUTPUT);
-
-  pinMode(BUTTON_PIN1, INPUT);
-  pinMode(BUTTON_PIN2, INPUT);
-  pinMode(BUTTON_PIN3, INPUT);
-  pinMode(BUTTON_PIN4, INPUT);
-
-  Serial.begin(9600);
-
-  // Inizializza la generazione dei numeri casuali
-  randomSeed(analogRead(0));
-
-  currIntensity = 0;
-  fadeAmount =  5;
-
-  //timer per lo sleep
-  timer = new TimerOne();
-  timer->setPeriod(10000); // 10 sec
-  //timer.attachInterrupt();
-
-  //interrupt per accendere luci
-  enableInterrupt(BUTTON_PIN1, on_button_1_clicked, RISING);
-  enableInterrupt(BUTTON_PIN2, on_button_2_clicked, RISING);
-  enableInterrupt(BUTTON_PIN3, on_button_3_clicked, RISING);
-  enableInterrupt(BUTTON_PIN4, on_button_4_clicked, RISING);
-
-}
-
-void read_difficulty() {
-  int potentiometer_value = analogRead(POT_PIN); 
-  Serial.print("Potentiometer value = " + String(potentiometer_value));
-
-  int difficulty = map(potentiometer_value, 0, 1023, 0, 3);
-  Serial.print("Difficulty = " + String(difficulty));
-  
-  time_data.t2 = time_data.t2_delays[difficulty];
-  time_data.t3 = time_data.t3_delays[difficulty];
-}
-
-void update_red_led_intensity() {
-    // luce rossa inizia a pulsare
-    analogWrite(LEDR_PIN, currIntensity);
-    currIntensity = currIntensity + fadeAmount;
-    //Serial.println("val intesità \n");
-    //Serial.println(currIntensity);
-    //Serial.println(fadeAmount);
-
-    if (currIntensity == 0 || currIntensity == 255) {
-      fadeAmount = -fadeAmount;
-    }
-    delay(15);
-}
+#include "state_machine.h"
+#include "config.h" // Includi il file di configurazione
 
 void boot() {
   Serial.println("\n------------------------");
@@ -193,6 +47,7 @@ void boot() {
   Serial.println("DEMO");
   interrupts();
 }
+
 
 void demo() {
   read_difficulty();
@@ -305,20 +160,4 @@ void turn() {
     clac = -1;
   }
   interrupts();
-}
-
-void loop() {
-  switch (current_state) {
-    case BOOT:
-      boot();
-      break;
-    case DEMO:
-      demo();
-      break;
-    case TURN: 
-      turn();
-      break;
-    default:
-      break;
-  }
 }
