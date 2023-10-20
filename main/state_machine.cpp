@@ -1,5 +1,6 @@
 #include "state_machine.h"
 #include "config.h" // Includi il file di configurazione
+#include "utilities.h"
 
 void boot() {
   Serial.println("\n------------------------");

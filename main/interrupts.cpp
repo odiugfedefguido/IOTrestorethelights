@@ -1,5 +1,7 @@
 #include "interrupts.h"
 #include "config.h" // Includi il file di configurazione
+#include "state_machine.h"
+#include "utilities.h"
 
 void on_button_1_clicked(){
   if (current_state == TURN) {
