@@ -1,5 +1,10 @@
 void turn()
 {
+    if(millis() - start_time >= t3){
+      Serial.println("Game Over, Time is over");
+      current_state=BOOT;
+    }
+    
     noInterrupts();
     if (clac != -1)
     {
@@ -12,6 +17,7 @@ void turn()
             button_order = button_order % multiplier;
             multiplier = multiplier / 10;
             attemps--;
+            debug("attempts = " + String(attemps));
             debug("Correct button pressed!");
         }
         else
@@ -27,7 +33,7 @@ void turn()
             noInterrupts();
             delay(1000);
             debug("Wrong button. Game over!!");
-            
+            t3 = -1;
             digitalWrite(LEDR_PIN, HIGH);
             delay(10000);
                         current_state = BOOT;

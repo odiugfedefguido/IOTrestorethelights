@@ -1,6 +1,8 @@
 void demo()
 {
-    read_difficulty();
+    if (t3 == -1) {
+      read_difficulty();
+    }
 
     // iniziano a spegnersi i led
     pinMode(LEDR_PIN, LOW);
@@ -73,6 +75,8 @@ void demo()
     debug("Button order = " + String(button_order));
 
     noInterrupts();
+    start_time = millis();
+    debug("t3 = " + String(t3));
     current_state = TURN;
     debug("TURN");
 

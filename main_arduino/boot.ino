@@ -2,7 +2,7 @@ void update_red_led_intensity();
 void read_difficulty();
 
 int t2_delays[] = {1500, 1200, 900, 500};
-int t3_delays[] = {1000, 600, 400, 200};
+int t3_delays[] = {8000, 5400, 2600, 1600};
 
 void boot()
 {

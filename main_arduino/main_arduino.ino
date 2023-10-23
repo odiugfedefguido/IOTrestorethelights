@@ -21,8 +21,8 @@ State current_state = BOOT;
 
 // variabili per i tempi
 int t1 = 10000; // millisecondi prima di iniziare il gioco
-int t2 = 300; // millisecondi prima di spegnere il led dopo
-int t3 = 1500; // millisecondi per accendere i led
+int t2 = -1; // millisecondi prima di spegnere il led dopo
+int t3 = -1; // millisecondi per accendere i led
 
 int multiplier; 
 int button_order;
