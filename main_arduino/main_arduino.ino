@@ -20,21 +20,11 @@ typedef enum { BOOT, DEMO, TURN, FAILED } State;
 State current_state = BOOT;
 
 // variabili per i tempi
-typedef struct
-{
-    int t1; // millisecondi prima di iniziare il gioco
-    int t2; // millisecondi prima di spegnere il led dopo
-    int *t2_delays;
-    int t3; // millisecondi per accendere i led
-    int *t3_delays;
-} TimeData;
+int t1 = 10000; // millisecondi prima di iniziare il gioco
+int t2 = 300; // millisecondi prima di spegnere il led dopo
+int t3 = 1500; // millisecondi per accendere i led
 
-TimeData time_data = 
-{
-    2000, 15000, (1500, 1200, 900, 500), 1000, (10000, 6000, 4000, 2000)
-};
-
-int multiplier;
+int multiplier; 
 int button_order;
 
 volatile int clac = -1; // bottone premuto

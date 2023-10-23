@@ -1,6 +1,9 @@
 void update_red_led_intensity();
 void read_difficulty();
 
+int t2_delays[] = {1500, 1200, 900, 500};
+int t3_delays[] = {1000, 600, 400, 200};
+
 void boot()
 {
     debug("\n------------------------\nBOOT");
@@ -43,8 +46,8 @@ void boot()
     digitalWrite(LEDG_PIN1, HIGH);
     digitalWrite(LEDR_PIN, HIGH);
 
-    delay(time_data.t1); // tempo attesa inizio gioco
-
+    delay(1000); // tempo attesa spegnimento luce rossa
+    Serial.println("Go!");
     noInterrupts();
     current_state = DEMO;
     debug("DEMO");
@@ -53,14 +56,16 @@ void boot()
 
 void read_difficulty()
 {
+   debug("t2: " + String(t2));
     int potentiometer_value = analogRead(POT_PIN);
     debug("Potentiometer value = " + String(potentiometer_value));
 
     int difficulty = map(potentiometer_value, 0, 1023, 0, 3);
     debug("Difficulty = " + String(difficulty));
 
-    time_data.t2 = time_data.t2_delays[difficulty];
-    time_data.t3 = time_data.t3_delays[difficulty];
+    t2 = t2_delays[difficulty];
+    t3 = t3_delays[difficulty];
+    debug("t2: " + String(t2));
 }
 
 void update_red_led_intensity()

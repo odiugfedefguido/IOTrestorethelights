@@ -5,6 +5,8 @@ void demo()
     // iniziano a spegnersi i led
     pinMode(LEDR_PIN, LOW);
 
+    Serial.println("Go!");
+
     button_order = 0;  // variabile usata per non usare un vettore
     int led_count = 0; // led accesi
     multiplier = 1;
@@ -63,7 +65,7 @@ void demo()
         button_order = button_order + n * multiplier;
         multiplier = multiplier * 10;
         led_count++;
-        delay(time_data.t2);
+        delay(t2);
     }
 
     multiplier = multiplier / 10;
@@ -73,7 +75,6 @@ void demo()
     noInterrupts();
     current_state = TURN;
     debug("TURN");
-    Serial.println("Go!");
 
     points = 0;
     Serial.println("points: " + String(points));

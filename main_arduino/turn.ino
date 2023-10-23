@@ -25,11 +25,11 @@ void turn()
         if (attemps == 0)
         {
             // TODO: Move to correct location.
-            time_data.t1 = (int)time_data.t1 * 0.95;
-            time_data.t2 = (int)time_data.t2 * 0.95;
-            time_data.t3 = (int)time_data.t3 * 0.95;
+            t1 = (int)t1 * 0.95;
+            t2 = (int)t2 * 0.95;
+            t3 = (int)t3 * 0.95;
             points++;
-            Serial.println("New Point! Total Points:");
+            Serial.println("New Point! Score:");
             Serial.println(points);
 
             attemps = 4;
