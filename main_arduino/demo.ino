@@ -81,6 +81,5 @@ void demo()
     debug("TURN");
 
     points = 0;
-    Serial.println("points: " + String(points));
     interrupts();
 }
