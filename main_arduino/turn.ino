@@ -16,10 +16,26 @@ void turn()
         }
         else
         {
-            debug("Wrong button. Game over!");
             attemps = 4;
             points = 0;
-            current_state = BOOT;
+            delay(1000);
+            digitalWrite(LEDG_PIN4, LOW);
+            digitalWrite(LEDG_PIN3, LOW);
+            digitalWrite(LEDG_PIN2, LOW);
+            digitalWrite(LEDG_PIN1, LOW);
+            digitalWrite(LEDR_PIN, HIGH); //led rosso si accende per un secondo
+            noInterrupts();
+            delay(1000);
+            debug("Wrong button. Game over!!");
+            
+            digitalWrite(LEDR_PIN, HIGH);
+            delay(10000);
+                        current_state = BOOT;
+            debug("pin rosso acceso");
+
+            
+            
+            game_started = true; //torna in fase iniziale con luce rossa che pulsa
         }
 
         if (attemps == 0)

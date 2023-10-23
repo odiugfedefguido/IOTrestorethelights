@@ -9,14 +9,14 @@ void boot()
     debug("\n------------------------\nBOOT");
     
     // se gioco è iniziato
-    if (!game_started)
+    while (!game_started)
     {
         // Primo messaggio sulla seriale
         Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
 
         // inizia il timer
         start_time = millis();
-
+        
         // attendi pulsante b1 o che i 10 sec passino
         while ((!game_started) && (millis() - start_time <= wait_time))
         {
@@ -27,16 +27,18 @@ void boot()
                 break;
             }
         }
-    }
+    
+      // se gioco non è iniziato in deep sleep
+      if (!game_started)
+      {
+          debug("sleep");
+          digitalWrite(LEDR_PIN, LOW);
+          set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+          sleep_enable();
+          sleep_mode();
+         delay(500);
+      }
 
-    // se gioco non è iniziato in deep sleep
-    if (!game_started)
-    {
-        debug("sleep");
-        digitalWrite(LEDR_PIN, LOW);
-        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        sleep_enable();
-        sleep_mode();
     }
 
     // stato iniziale di gioco dove tutti i led verdi sono accesi
