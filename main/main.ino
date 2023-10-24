@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara Denardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 #include <Arduino.h>
 #include <avr/sleep.h>
 #include <TimerOne.h>
