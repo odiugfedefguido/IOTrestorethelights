@@ -1,0 +1,9 @@
+﻿Name,Quantity,Component
+"U1",1," Arduino Uno R3"
+"SButton1, SButton2, SButton3, SButton4",4," Pushbutton"
+"DLED1, DLED2, DLED3, DLED4",4,"Green LED"
+"RpotPotentiometer2",1,"250 kΩ Potentiometer"
+"RLED1Resistor, RLED2Resistor, RLED3Resistor, RLED4Resistor",4,"125 Ω Resistor"
+"RButton1Resistor, RButton2Resistor, RButton3Resistor, RButton4Resistor",4,"10 kΩ Resistor"
+"DLEDS",1,"Red LED"
+"RLEDSResistor",1,"220 Ω Resistor"
