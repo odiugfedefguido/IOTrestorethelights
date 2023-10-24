@@ -67,7 +67,11 @@ void demo()
         button_order = button_order + n * multiplier;
         multiplier = multiplier * 10;
         led_count++;
-        delay(t2);
+
+        if (led_count < 4)
+        {
+            delay(t2);
+        }
     }
 
     multiplier = multiplier / 10;
