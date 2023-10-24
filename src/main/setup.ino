@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara De Nardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 void setup()
 {
     // put your setup code here, to run once:

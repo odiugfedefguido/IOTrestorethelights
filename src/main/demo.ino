@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara De Nardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 void demo()
 {
     // turn off red LED

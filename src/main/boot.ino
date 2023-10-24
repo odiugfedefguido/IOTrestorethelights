@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara De Nardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 void update_red_led_intensity();
 void read_difficulty();
 

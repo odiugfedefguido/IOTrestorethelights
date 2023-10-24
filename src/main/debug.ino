@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara De Nardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 // 0 for disable the debug and 1 for active it 
 #define DEBUG 1
 

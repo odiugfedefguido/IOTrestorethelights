@@ -1,3 +1,10 @@
+/*
+ * GROUP MEMBERS
+ * Chiara De Nardi
+ * Federica Guiducci
+ * Florian Knoch
+ */
+
 // restore from the sleep
 void wake_up() {}
 
