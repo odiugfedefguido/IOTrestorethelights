@@ -31,12 +31,13 @@ void boot()
       // se gioco non è iniziato in deep sleep
       if (!game_started)
       {
-          debug("sleep");
-          digitalWrite(LEDR_PIN, LOW);
-          set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-          sleep_enable();
-          sleep_mode();
-         delay(500);
+        interrupts();
+        debug("sleep");
+        digitalWrite(LEDR_PIN, LOW);
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+        sleep_enable();
+        sleep_mode();
+        delay(500);
       }
 
     }
@@ -49,7 +50,6 @@ void boot()
     digitalWrite(LEDR_PIN, HIGH);
 
     delay(1000); // tempo attesa spegnimento luce rossa
-    Serial.println("Go!");
     noInterrupts();
     current_state = DEMO;
     debug("DEMO");
@@ -79,5 +79,7 @@ void update_red_led_intensity()
     {
         fade_amount = -fade_amount;
     }
+    interrupts();
     delay(15);
+    noInterrupts();
 }

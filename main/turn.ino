@@ -1,10 +1,10 @@
+void game_over();
+
 void turn()
 {
     if(millis() - start_time >= t3){
-        noInterrupts();
-        Serial.println("Game Over, Time is over");
-        current_state = BOOT;
-        interrupts();
+        debug("Time is over");
+        game_over();
         return;
     }
     
@@ -26,27 +26,7 @@ void turn()
         else
         {
             debug("Wrong button. Game over!");
-            Serial.println("Final score: " + String(points));
-
-            digitalWrite(LEDG_PIN4, LOW);
-            digitalWrite(LEDG_PIN3, LOW);
-            digitalWrite(LEDG_PIN2, LOW);
-            digitalWrite(LEDG_PIN1, LOW);
-
-            current_state = FAILED;
-            interrupts();
-            analogWrite(LEDR_PIN, 255); //led rosso si accende per un secondo
-            delay(1000);
-            analogWrite(LEDR_PIN, 0);
-            delay(10000);
-            noInterrupts();
-
-            // reset values
-            attemps = 4;
-            points = 0;
-            t3 = -1;
-            current_state = BOOT;            
-            game_started = false;
+            game_over();
         }
 
         if (attemps == 0)
@@ -58,10 +38,38 @@ void turn()
             Serial.println("New Point! Score: " + String(points));
 
             attemps = 4;
-            current_state = BOOT;
+            current_state = DEMO;
             game_started = false;
         }
+
+        interrupts();
+        delay(200);
         clac = -1;
     }
     interrupts();
+}
+
+void game_over() 
+{
+  Serial.println("Game over! Final score: " + String(points));
+
+  digitalWrite(LEDG_PIN4, LOW);
+  digitalWrite(LEDG_PIN3, LOW);
+  digitalWrite(LEDG_PIN2, LOW);
+  digitalWrite(LEDG_PIN1, LOW);
+
+  current_state = FAILED;
+  interrupts();
+  analogWrite(LEDR_PIN, 255); //led rosso si accende per un secondo
+  delay(1000);
+  analogWrite(LEDR_PIN, 0);
+  delay(10000);
+  noInterrupts();
+
+  // reset values
+  attemps = 4;
+  points = 0;
+  t3 = -1;
+  current_state = BOOT;            
+  game_started = false;
 }

@@ -2,12 +2,15 @@ void wake_up() {}
 
 void check_button_input(int button, int pin)
 {
+  wake_up();
   if (current_state == TURN) 
   {
     clac = button;
     digitalWrite(pin, HIGH);
     debug("Button " + String(button) + " clicked");
-    wake_up();
+    interrupts();
+    delay(100);
+    noInterrupts();
   }
 }
 

@@ -6,7 +6,11 @@ void demo()
 
     if (t3 == -1) {
       read_difficulty();
+      points = 0;
     }
+
+    interrupts();
+    delay(t2);
 
     // create button order at random
     button_order = 0;  // variable used to not use an array
@@ -81,7 +85,6 @@ void demo()
     // prepare turn
     start_time = millis();
     current_state = TURN;
-    points = 0;
 
     debug("Button order = " + String(button_order));
     debug("TURN");
