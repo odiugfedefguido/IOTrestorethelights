@@ -1,8 +1,11 @@
 void turn()
 {
     if(millis() - start_time >= t3){
-      Serial.println("Game Over, Time is over");
-      current_state=BOOT;
+        noInterrupts();
+        Serial.println("Game Over, Time is over");
+        current_state = BOOT;
+        interrupts();
+        return;
     }
     
     noInterrupts();
@@ -13,18 +16,18 @@ void turn()
 
         if (clic == clac)
         {
+            debug("Correct button pressed!");
+            debug("attempts = " + String(attemps));
             clic = button_order / multiplier;
             button_order = button_order % multiplier;
             multiplier = multiplier / 10;
             attemps--;
-            debug("attempts = " + String(attemps));
-            debug("Correct button pressed!");
         }
         else
         {
-            attemps = 4;
-            points = 0;
-            delay(1000);
+            debug("Wrong button. Game over!");
+            Serial.println("Final score: " + String(points));
+
             digitalWrite(LEDG_PIN4, LOW);
             digitalWrite(LEDG_PIN3, LOW);
             digitalWrite(LEDG_PIN2, LOW);
@@ -35,18 +38,15 @@ void turn()
             analogWrite(LEDR_PIN, 255); //led rosso si accende per un secondo
             delay(1000);
             analogWrite(LEDR_PIN, 0);
-
-            debug("Wrong button. Game over!!");
-            t3 = -1;
-            Serial.println("Final score: " + String(points));
             delay(10000);
             noInterrupts();
 
-            current_state = BOOT;
-
-            
-            
-            game_started = false; //torna in fase iniziale con luce rossa che pulsa
+            // reset values
+            attemps = 4;
+            points = 0;
+            t3 = -1;
+            current_state = BOOT;            
+            game_started = false;
         }
 
         if (attemps == 0)

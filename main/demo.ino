@@ -1,19 +1,19 @@
 void demo()
 {
+    // turn off red LED
+    pinMode(LEDR_PIN, LOW);
+    Serial.println("Go!");
+
     if (t3 == -1) {
       read_difficulty();
     }
 
-    // iniziano a spegnersi i led
-    pinMode(LEDR_PIN, LOW);
-
-    Serial.println("Go!");
-
-    button_order = 0;  // variabile usata per non usare un vettore
-    int led_count = 0; // led accesi
+    // create button order at random
+    button_order = 0;  // variable used to not use an array
+    int led_count = 0; // LEDs that have been turned off
     multiplier = 1;
 
-    // qui spengo i led, devo spegnerli in un tempo T3
+    // turn off LEDs with delay t3
     while (led_count < 4)
     {
         int n = random(0, 4);
@@ -76,14 +76,15 @@ void demo()
 
     multiplier = multiplier / 10;
 
-    debug("Button order = " + String(button_order));
-
     noInterrupts();
+
+    // prepare turn
     start_time = millis();
-    debug("t3 = " + String(t3));
     current_state = TURN;
+    points = 0;
+
+    debug("Button order = " + String(button_order));
     debug("TURN");
 
-    points = 0;
     interrupts();
 }
