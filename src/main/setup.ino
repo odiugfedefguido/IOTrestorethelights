@@ -20,11 +20,6 @@ void setup()
     curr_intensity = 0;
     fade_amount = 5;
 
-    // timer per lo sleep
-    timer = new TimerOne();
-    timer->setPeriod(10000); // 10 sec
-    // timer.attachInterrupt();
-
     // interrupt per accendere luci
     enableInterrupt(BUTTON_PIN1, on_button_1_clicked, RISING);
     enableInterrupt(BUTTON_PIN2, on_button_2_clicked, RISING);

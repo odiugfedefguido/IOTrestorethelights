@@ -17,11 +17,11 @@ void turn()
         if (clic == clac)
         {
             debug("Correct button pressed!");
-            debug("attempts = " + String(attemps));
+            debug("attempts = " + String(attempts));
             clic = button_order / multiplier;
             button_order = button_order % multiplier;
             multiplier = multiplier / 10;
-            attemps--;
+            attempts--;
         }
         else
         {
@@ -29,7 +29,7 @@ void turn()
             game_over();
         }
 
-        if (attemps == 0)
+        if (attempts == 0)
         {
             t1 = (int)t1 * 0.95;
             t2 = (int)t2 * 0.95;
@@ -37,7 +37,7 @@ void turn()
             points++;
             Serial.println("New Point! Score: " + String(points));
 
-            attemps = 4;
+            attempts = 4;
             current_state = DEMO;
             game_started = false;
         }
@@ -67,7 +67,7 @@ void game_over()
   noInterrupts();
 
   // reset values
-  attemps = 4;
+  attempts = 4;
   points = 0;
   t3 = -1;
   current_state = BOOT;            

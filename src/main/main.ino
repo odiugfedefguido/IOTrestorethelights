@@ -7,44 +7,55 @@
 
 #include <Arduino.h>
 #include <avr/sleep.h>
-#include <TimerOne.h>
 #include <EnableInterrupt.h>
 
+// green LED pins
 #define LEDG_PIN1 10 // button 2
 #define LEDG_PIN2 11 // button 3
 #define LEDG_PIN3 12 // button 4
 #define LEDG_PIN4 13 // button 5
 
+// red LED pin
 #define LEDR_PIN 6
+
+// potentiometer pin
 #define POT_PIN A0
 
+// button pins
 #define BUTTON_PIN1 2
 #define BUTTON_PIN2 3
 #define BUTTON_PIN3 4
 #define BUTTON_PIN4 5
 
+// game states
 typedef enum { BOOT, DEMO, TURN, FAILED } State;
 State current_state = BOOT;
 
-// variabili per i tempi
-int t1 = 10000; // millisecondi prima di iniziare il gioco
-int t2 = -1; // millisecondi prima di spegnere il led dopo
-int t3 = -1; // millisecondi per accendere i led
+// time variables
+int t0 = 10000; // milliseconds before going to sleep
+int t1 = 1000; // milliseconds before turning on all green lights
+int t2 = -1; // milliseconds to turn off each light
+int t3 = -1; // milliseconds to turn all of them them back on 
+// initial value -1 to keep track of whether this is a fresh boot or not
 
+// variables to store the button order in a single int
 int multiplier; 
 int button_order;
 
-volatile int clac = -1; // bottone premuto
+// the button that was pressed last (-1 = none)
+volatile int clac = -1;
+
+// the button that is supposed to be pressed next
 int clic = 0;
-volatile int attemps = 4;
+
+// how many buttons remain to be pressed in a turn
+volatile int attempts = 4;
+
+// the game score
 volatile int points = 0;
 
-TimerOne *timer;
-int curr_intensity;
-int fade_amount;
-bool game_started = false; // Flag per indicare se il gioco è iniziato
-unsigned long wait_time = 10000;
-unsigned long start_time;
+// whether the game has begun already
+bool game_started = false;
 
 // debug
 void debug(char* message);
