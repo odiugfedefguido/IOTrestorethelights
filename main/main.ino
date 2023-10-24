@@ -1,55 +1,74 @@
 #include <Arduino.h>
-#include "config.h"
-#include "state_machine.h"
-#include "utilities.h"
-#include "interrupts.h"
+#include <avr/sleep.h>
+#include <TimerOne.h>
+#include <EnableInterrupt.h>
 
-void setup() {
-  // put your setup code here, to run once:
-  pinMode(LEDG_PIN1, OUTPUT);
-  pinMode(LEDG_PIN2, OUTPUT);
-  pinMode(LEDG_PIN3, OUTPUT);
-  pinMode(LEDG_PIN4, OUTPUT);
-  pinMode(LEDR_PIN, OUTPUT);
+#define LEDG_PIN1 10 // button 2
+#define LEDG_PIN2 11 // button 3
+#define LEDG_PIN3 12 // button 4
+#define LEDG_PIN4 13 // button 5
 
-  pinMode(BUTTON_PIN1, INPUT);
-  pinMode(BUTTON_PIN2, INPUT);
-  pinMode(BUTTON_PIN3, INPUT);
-  pinMode(BUTTON_PIN4, INPUT);
+#define LEDR_PIN 6
+#define POT_PIN A0
 
-  Serial.begin(9600);
+#define BUTTON_PIN1 2
+#define BUTTON_PIN2 3
+#define BUTTON_PIN3 4
+#define BUTTON_PIN4 5
 
-  // Inizializza la generazione dei numeri casuali
-  randomSeed(analogRead(0));
+typedef enum { BOOT, DEMO, TURN, FAILED } State;
+State current_state = BOOT;
 
-  currIntensity = 0;
-  fadeAmount =  5;
+// variabili per i tempi
+int t1 = 10000; // millisecondi prima di iniziare il gioco
+int t2 = -1; // millisecondi prima di spegnere il led dopo
+int t3 = -1; // millisecondi per accendere i led
 
-  //timer per lo sleep
-  timer = new TimerOne();
-  timer->setPeriod(10000); // 10 sec
-  //timer.attachInterrupt();
+int multiplier; 
+int button_order;
 
-  //interrupt per accendere luci
-  enableInterrupt(BUTTON_PIN1, on_button_1_clicked, RISING);
-  enableInterrupt(BUTTON_PIN2, on_button_2_clicked, RISING);
-  enableInterrupt(BUTTON_PIN3, on_button_3_clicked, RISING);
-  enableInterrupt(BUTTON_PIN4, on_button_4_clicked, RISING);
+volatile int clac = -1; // bottone premuto
+int clic = 0;
+volatile int attemps = 4;
+volatile int points = 0;
 
-}
+TimerOne *timer;
+int curr_intensity;
+int fade_amount;
+bool game_started = false; // Flag per indicare se il gioco è iniziato
+unsigned long wait_time = 10000;
+unsigned long start_time;
 
-void loop() {
-  switch (current_state) {
+// debug
+void debug(char* message);
+
+// buttons
+void on_button_1_clicked();
+void on_button_2_clicked();
+void on_button_3_clicked();
+void on_button_4_clicked();
+void wake_up();
+
+// game loop
+void setup();
+void boot();
+void demo();
+void turn();
+
+void loop()
+{
+    switch (current_state)
+    {
     case BOOT:
-      boot();
-      break;
+        boot();
+        break;
     case DEMO:
-      demo();
-      break;
-    case TURN: 
-      turn();
-      break;
+        demo();
+        break;
+    case TURN:
+        turn();
+        break;
     default:
-      break;
-  }
+        break;
+    }
 }
