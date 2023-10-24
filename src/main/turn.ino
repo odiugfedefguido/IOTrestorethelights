@@ -2,6 +2,7 @@ void game_over();
 
 void turn()
 {
+    // if the user doesn't finish the game on time --> time out
     if(millis() - start_time >= t3){
         debug("Time is over");
         game_over();
@@ -9,11 +10,17 @@ void turn()
     }
     
     noInterrupts();
+
+    // if the user has pressed a button
     if (clac != -1)
     {
         debug("Registered press of button " + String(clac));
-        clic = button_order / multiplier;
 
+        // to obtain which button to press
+        // ie: 3201/1000 = 3 -> button 3
+        clic = button_order / multiplier; 
+
+        // if the user has pressed the correct button
         if (clic == clac)
         {
             debug("Correct button pressed!");
@@ -29,6 +36,7 @@ void turn()
             game_over();
         }
 
+        // when you finished to press all buttons
         if (attempts == 0)
         {
             t1 = (int)t1 * 0.95;
@@ -49,6 +57,7 @@ void turn()
     interrupts();
 }
 
+// function to manage the game over
 void game_over() 
 {
   Serial.println("Game over! Final score: " + String(points));
@@ -63,7 +72,8 @@ void game_over()
   analogWrite(LEDR_PIN, 255); //led rosso si accende per un secondo
   delay(1000);
   analogWrite(LEDR_PIN, 0);
-  delay(10000);
+  // goes into sleep for 10 second
+  delay(10000); 
   noInterrupts();
 
   // reset values

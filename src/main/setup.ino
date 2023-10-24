@@ -14,13 +14,14 @@ void setup()
 
     Serial.begin(9600);
 
-    // Inizializza la generazione dei numeri casuali
+    // initialize the generation of casual numbers
     randomSeed(analogRead(0));
 
+    // it sets the value for the pulsing red light
     curr_intensity = 0;
     fade_amount = 5;
 
-    // interrupt per accendere luci
+    // interrupt for turning on the lights
     enableInterrupt(BUTTON_PIN1, on_button_1_clicked, RISING);
     enableInterrupt(BUTTON_PIN2, on_button_2_clicked, RISING);
     enableInterrupt(BUTTON_PIN3, on_button_3_clicked, RISING);

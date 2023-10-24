@@ -1,6 +1,6 @@
 /*
  * GROUP MEMBERS
- * Chiara Denardi
+ * Chiara De Nardi
  * Federica Guiducci
  * Florian Knoch
  */
@@ -57,17 +57,19 @@ volatile int points = 0;
 // whether the game has begun already
 bool game_started = false;
 
-// debug
+// function for debugging
 void debug(char* message);
 
-// buttons
+// functions to capture the clicked button
 void on_button_1_clicked();
 void on_button_2_clicked();
 void on_button_3_clicked();
 void on_button_4_clicked();
+
+// restore from the sleep
 void wake_up();
 
-// game loop
+// functions of the state of the game's loop
 void setup();
 void boot();
 void demo();

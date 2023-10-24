@@ -1,5 +1,7 @@
-#define DEBUG 0
+// 0 for disable the debug and 1 for active it 
+#define DEBUG 1
 
+// functions to show the debug messages in the serial line
 void debug(char* message) 
 {
   if (DEBUG)

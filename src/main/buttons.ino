@@ -1,5 +1,10 @@
+// restore from the sleep
 void wake_up() {}
 
+ /*  
+ * Check if the button is being pressed.  
+ * It's checked just if it is in the TURN states.  
+ */
 void check_button_input(int button, int pin)
 {
   wake_up();
@@ -14,6 +19,7 @@ void check_button_input(int button, int pin)
   }
 }
 
+// functions to capture the clicked button and the corresponding led
 void on_button_1_clicked()
 {
   check_button_input(0, LEDG_PIN1);

@@ -1,10 +1,11 @@
 void update_red_led_intensity();
 void read_difficulty();
 
+// arrays that contains different time for the different difficulty of each level
 int t2_delays[] = {1500, 1200, 900, 500};
 int t3_delays[] = {8000, 5400, 2600, 1600};
 
-// the game's starting timestamp 
+// the game's starting timestamp to count how much time it has passed before the sleep
 unsigned long start_time;
 
 // the red LED's intensity
@@ -17,10 +18,11 @@ void boot()
 {
   debug("\n------------------------\nBOOT");
   
-  // while the game has not yet begun …
+  // while the game has not yet begun
   while (!game_started)
   {
     // initial message
+    Serial.println("\n");
     Serial.println("Welcome to the Restore the Light Game. Press Key B1 to Start \n");
 
     // set the starting timestamp
